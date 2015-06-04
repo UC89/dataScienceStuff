@@ -15,6 +15,14 @@ def linear_regression(features, values):
    	params = lr.coef_
    	return intercept, params
 
+def calculateR2(data,predictions):
+	dataMean = np.mean(data)
+	dataDiff = np.power((data - dataMean),2)
+	predictionDiff = np.power((data - predictions),2)
+	SSres = np.sum(predictionDiff)
+	SStot = np.sum(dataDiff)
+	r_squared = 1-(SSres/SStot)
+
 data_raw = pandas.read_csv('turnstile_data_master_with_weather.csv')
 data_raw['daily_riders'] = data_raw.ENTRIESn_hourly
 #lh_batting_averages = batter_data[batter_data['handedness'] == 'L']
@@ -26,17 +34,32 @@ print '\t there is an average of ',rainyDays['ENTRIESn_hourly'].mean(),' Riders'
 notRainyDays = data_raw[data_raw['rain']== 1]
 print 'There are ',notRainyDays['rain'].count(),' days with NO rain'
 print '\t there is an average of ',notRainyDays['ENTRIESn_hourly'].mean(), ' Riders'
-binLabels  = []
-for x in range(20):
-	binLabels.append(x*250)
-plt.title('Histogram of ENTRIESn_hourly')
-plt.xlabel('ENTRIESn_hourly')
-plt.ylabel('Frequency')
-rainyDays['ENTRIESn_hourly'].hist(bins=binLabels,label=['Rain'])
-notRainyDays['ENTRIESn_hourly'].hist(bins=binLabels,label=['No rain'])
-#rainyDays.plot(kind='hist')
-plt.legend()
-#plt.show()
+
+def plotGraph():
+	binLabels  = []
+	for x in range(20):
+		binLabels.append(x*250)
+	plt.title('Histogram of ENTRIESn_hourly')
+	plt.xlabel('ENTRIESn_hourly')
+	plt.ylabel('Frequency')
+	rainyDays['ENTRIESn_hourly'].hist(bins=binLabels,label=['Rain'])
+	notRainyDays['ENTRIESn_hourly'].hist(bins=binLabels,label=['No rain'])
+	plt.legend()
+	plt.show()
+
+#custom plot ([data],binLabels=10) #preliminary working
+
+def customPlot(dataIn,binLabels=10,titleIn='Histogram',yLabelIn='frequency'):
+	setNumber=0
+	for dSet in dataIn:
+		dSet.hist(bins=binLabels,label=['Data: '+str(setNumber)])
+		setNumber+=1
+	plt.title(titleIn)
+	plt.xlabel('Unset')
+	plt.ylabel(yLabelIn)
+	plt.legend()
+	plt.show()
+
 
 u = scipy.stats.mannwhitneyu(rainyDays['ENTRIESn_hourly'],notRainyDays['ENTRIESn_hourly'])
 print 'U: ',u
@@ -58,5 +81,13 @@ predictions = intercept + np.dot(features_array,params)
 #y_predicted  = predictions[1]
 #print 'predictted: ',predictions
 #print 'Actual: ',values
+difference  = values_array-predictions
+#difference.hist()
+#plt.show()
 
 print 'r2',r2_score(values_array,predictions)
+print 'r2 Calculated: ',calculateR2(values_array,predictions)
+
+
+#plotGraph()
+customPlot([rainyDays['ENTRIESn_hourly'],notRainyDays['ENTRIESn_hourly']])
